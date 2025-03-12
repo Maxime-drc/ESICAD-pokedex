@@ -1,0 +1,116 @@
+<?php
+$page_title = 'Détails du Pokémon';
+require_once('config.php');
+require_once('header.php');
+
+// Vérifier si l'ID du Pokémon est fourni
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    $_SESSION['error'] = "ID du Pokémon non spécifié";
+    header('Location: index.php');
+    exit;
+}
+
+$pokemon_id = (int)$_GET['id'];
+
+// Récupérer les informations du Pokémon
+$sql = "SELECT * FROM pokemon WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $pokemon_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows !== 1) {
+    $_SESSION['error'] = "Pokémon non trouvé";
+    header('Location: index.php');
+    exit;
+}
+
+$pokemon = $result->fetch_assoc();
+
+// Si l'utilisateur est connecté, vérifier s'il a capturé ce Pokémon
+$user_captures = [];
+if (isLoggedIn()) {
+    $user_id = $_SESSION['user_id'];
+    $sql = "SELECT id, date_capture FROM capture_pokemon WHERE user_id = ? AND pokemon_id = ? ORDER BY date_capture DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $user_id, $pokemon_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $user_captures[] = $row;
+    }
+}
+?>
+
+<div class="pokemon-details">
+    <h1><?php echo htmlspecialchars($pokemon['nom']); ?> #<?php echo $pokemon['numero']; ?></h1>
+    
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="success"><?php echo $_SESSION['message']; ?></div>
+        <?php unset($_SESSION['message']); ?>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="error"><?php echo $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+    
+    <div class="pokemon-card">
+        <div class="pokemon-info">
+            <p><strong>Type:</strong> <?php echo htmlspecialchars($pokemon['type']); ?></p>
+            <p><strong>Taille:</strong> <?php echo $pokemon['taille']; ?> m</p>
+            <p><strong>Poids:</strong> <?php echo $pokemon['poids']; ?> kg</p>
+            <p><strong>Description:</strong> <?php echo htmlspecialchars($pokemon['description']); ?></p>
+        </div>
+    </div>
+    
+    <?php if (isLoggedIn()): ?>
+        <div class="capture-section">
+            <?php if (empty($user_captures)): ?>
+                <p>Vous n'avez pas encore capturé ce Pokémon.</p>
+                <form method="post" action="capture.php">
+                    <input type="hidden" name="pokemon_id" value="<?php echo $pokemon_id; ?>">
+                    <input type="hidden" name="date_capture" value="<?php echo date('Y-m-d'); ?>">
+                    <button type="submit" class="btn">Capturer ce Pokémon</button>
+                </form>
+            <?php else: ?>
+                <h2>Vos captures de ce Pokémon</h2>
+                <div class="capture-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date de capture</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($user_captures as $capture): ?>
+                                <tr>
+                                    <td><?php echo date('d/m/Y', strtotime($capture['date_capture'])); ?></td>
+                                    <td>
+                                        <form method="post" action="supprimer_capture.php" style="display: inline; padding: 0; box-shadow: none; background: none;">
+                                            <input type="hidden" name="capture_id" value="<?php echo $capture['id']; ?>">
+                                            <button type="submit" class="btn-small btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir libérer ce Pokémon ?')">Libérer</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Nombre total de captures: <?php echo count($user_captures); ?></p>
+                <form method="post" action="capture.php">
+                    <input type="hidden" name="pokemon_id" value="<?php echo $pokemon_id; ?>">
+                    <button type="submit" class="btn">Capturer à nouveau</button>
+                </form>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+    
+    <div class="back-link">
+        <a href="pokedex.php">&larr; Retour au Pokédex</a>
+    </div>
+</div>
+
+<?php require_once('footer.php'); ?>

@@ -1,15 +1,36 @@
-<!-- 
-    Ce fichier représente la page de résultats de recherche de pokémons du site.
--->
 <?php
 require_once("head.php");
 ?>
-<pre>
-    &lt;
-    A REMPLACER PAR VOTRE CODE POUR CHARGER ET AFFICHER DANS UN TABLEAU LE RESULTAT DE LA RECHERCHE DE POKEMONS DONT LE NOM CONTIENT LE TERME RECHERCHE, CLASSES PAR LEUR NOM.
-    CHAQUE POKEMON DOIT ETRE CLIQUABLE POUR NAVIGUER SUR UNE PAGE OU L'ON AFFICHE SON IMAGE ET L'ENSEMBLE DE SES CARACTERISTIQUES
-    &gt;
-    </pre>
+<h1>LISTE DES POKEMONS </h1>
+<article>
+    <table>
+        <thead>
+            <tr>
+                <th>numéro</th>
+                <th>nom</th>
+                <th>image</th>
+            </tr>
+        </thead>
+
+        <tbody>
+<?php
+require_once("database-connection.php");
+
+
+
+    // var_dump($_GET);
+    $recherche = $_GET['q'];
+    $sql = "SELECT * FROM Pokemon WHERE nomPokemon like '%".$recherche."%'";
+
+    $pokemon = $databaseConnection->query($sql)->fetch_all(MYSQLI_ASSOC);
+    foreach ($pokemon as $row) {
+        echo "<tr><td>" . $row["idPokemon"] . "</td><td>" . $row["nomPokemon"] . "</td><td><img src='" . $row["urlPhoto"] . "'/></td></tr>";
+    }
+
+    ?>
+        </tbody>
+    </table>
+</article>
 <?php
 require_once("footer.php");
 ?>
