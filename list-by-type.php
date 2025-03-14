@@ -290,16 +290,7 @@ if (isset($_GET['type']) && !empty($_GET['type'])) {
                                     <?php if (!empty($pokemon['urlPhoto'])): ?>
                                         <img src="<?= htmlspecialchars($pokemon['urlPhoto']) ?>" alt="<?= htmlspecialchars($pokemon['nomPokemon']) ?>">
                                     <?php endif; ?>
-                                    
-                                    <h3>#<?= str_pad($pokemon['idPokemon'], 3, '0', STR_PAD_LEFT) ?> - <?= htmlspecialchars($pokemon['nomPokemon']) ?></h3>
-                                    
-                                    <div>
-                                        <span class="type type-<?= htmlspecialchars($pokemon['typePrimaire']) ?>"><?= htmlspecialchars($pokemon['typePrimaire']) ?></span>
-                                        <?php if (!empty($pokemon['typeSecondaire'])): ?>
-                                            <span class="type type-<?= htmlspecialchars($pokemon['typeSecondaire']) ?>"><?= htmlspecialchars($pokemon['typeSecondaire']) ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                    
+                                    <h3>#<?= str_pad($pokemon['idPokemon'], 3, '0', STR_PAD_LEFT) ?> - <?= htmlspecialchars($pokemon['nomPokemon']) ?></h3>                                   
                                     <div class="pokemon-stats">
                                         <div>PV: <?= $pokemon['PV'] ?></div>
                                         <div>Attaque: <?= $pokemon['PtsAttaque'] ?></div>
@@ -317,9 +308,5 @@ if (isset($_GET['type']) && !empty($_GET['type'])) {
             </article>
         </main>
     </div>
-    
-    <footer>
-        <p>© 2025 Pokédex - Tous droits réservés</p>
-    </footer>
 </body>
 </html>
